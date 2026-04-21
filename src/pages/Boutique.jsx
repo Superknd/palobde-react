@@ -35,9 +35,9 @@ export default function Boutique() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', minHeight: 'calc(100vh - 110px)' }}>
+      <div className="boutique-layout" style={{ display: 'grid', gridTemplateColumns: '260px 1fr', minHeight: 'calc(100vh - 110px)' }}>
         {/* Sidebar */}
-        <aside style={{ background: 'var(--blanc)', borderRight: '1px solid var(--rose-light)', padding: '32px 24px', position: 'sticky', top: '110px', height: 'calc(100vh - 110px)', overflowY: 'auto' }}>
+        <aside className="boutique-sidebar" style={{ background: 'var(--blanc)', borderRight: '1px solid var(--rose-light)', padding: '32px 24px', position: 'sticky', top: '110px', height: 'calc(100vh - 110px)', overflowY: 'auto' }}>
           <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '28px' }}>Filtres</div>
 
           <div style={{ marginBottom: '32px' }}>
@@ -90,7 +90,7 @@ export default function Boutique() {
         </aside>
 
         {/* Main Content */}
-        <main style={{ padding: '32px 40px' }}>
+        <main className="boutique-main" style={{ padding: '32px 40px' }}>
           <motion.div 
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}
             initial={{ opacity: 0, y: 20 }}
@@ -105,7 +105,7 @@ export default function Boutique() {
             </select>
           </motion.div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+          <div className="boutique-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
             {products.map((product, i) => (
               <motion.div 
                 key={product.id}

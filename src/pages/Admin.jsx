@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'palobde2026';
+const ADMIN_SESSION_KEY = 'palobde-admin-session';
+
 // Données initiales (simulées - en production, cela viendrait d'une API/base de données)
 const initialProducts = [
   { id: 1, name: 'Kit Journée — Rose Faso', category: 'Serviettes Jour', price: 3500, stock: 45, active: true, image: null, description: 'Kit complet pour la journée avec 3 serviettes lavables' },
@@ -34,6 +37,14 @@ const initialPartners = [
 ];
 
 export default function Admin() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return window.sessionStorage.getItem(ADMIN_SESSION_KEY) === 'open';
+  });
+  const [passwordInput, setPasswordInput] = useState('');
+  const [authError, setAuthError] = useState('');
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState(initialProducts);
   const [orders, setOrders] = useState(initialOrders);
@@ -121,17 +132,69 @@ export default function Admin() {
     setShowAddPartnerForm(false);
   };
 
+  const handleLogin = (event) => {
+    event.preventDefault();
+    if (passwordInput === ADMIN_PASSWORD) {
+      window.sessionStorage.setItem(ADMIN_SESSION_KEY, 'open');
+      setIsAuthenticated(true);
+      setAuthError('');
+      setPasswordInput('');
+      return;
+    }
+
+    setAuthError('Mot de passe incorrect.');
+  };
+
+  const handleLogout = () => {
+    window.sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    setIsAuthenticated(false);
+    setPasswordInput('');
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="admin-page" style={{ paddingTop: '72px', minHeight: '100vh', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '20px', paddingRight: '20px' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ width: '100%', maxWidth: '460px', background: '#fff', borderRadius: '24px', padding: '32px', boxShadow: '0 24px 60px rgba(0,0,0,0.08)' }}
+        >
+          <div className="section-label">Acces Back-Office</div>
+          <h1 style={{ fontSize: '32px', marginBottom: '12px' }}>Connexion admin</h1>
+          <p style={{ fontSize: '14px', color: 'var(--gris)', lineHeight: 1.7, marginBottom: '24px' }}>
+            Entrez le mot de passe du back-office pour gerer les produits, commandes et contenus.
+          </p>
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gris)' }}>Mot de passe</label>
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={(event) => setPasswordInput(event.target.value)}
+              placeholder="Entrez le mot de passe"
+              style={{ width: '100%', padding: '14px 16px', border: '1px solid #ddd', borderRadius: '14px', fontSize: '14px' }}
+            />
+            {authError && <p style={{ fontSize: '12px', color: '#c0392b' }}>{authError}</p>}
+            <button type="submit" className="btn-primary" style={{ justifyContent: 'center' }}>
+              Acceder au back-office
+            </button>
+            
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ paddingTop: '72px', minHeight: '100vh', background: '#f5f5f5' }}>
+    <div className="admin-page" style={{ paddingTop: '72px', minHeight: '100vh', background: '#f5f5f5' }}>
       {/* Header Admin */}
-      <div style={{ background: 'var(--noir)', color: '#fff', padding: '24px 48px' }}>
+      <div className="admin-topbar" style={{ background: 'var(--noir)', color: '#fff', padding: '24px 48px' }}>
         <div className="container">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="admin-topbar-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px' }}>
             <div>
               <h1 style={{ fontSize: '24px', fontFamily: "'Playfair Display', serif" }}>Back-Office Palobde Afrique</h1>
               <p style={{ fontSize: '13px', opacity: 0.7 }}>Gestion du site e-commerce</p>
             </div>
-            <div style={{ display: 'flex', gap: '24px' }}>
+            <div className="admin-stats" style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '24px', fontWeight: '700' }}>{totalOrders}</div>
                 <div style={{ fontSize: '11px', opacity: 0.7 }}>Commandes</div>
@@ -148,14 +211,21 @@ export default function Admin() {
                 <div style={{ fontSize: '24px', fontWeight: '700' }}>{totalProducts}</div>
                 <div style={{ fontSize: '11px', opacity: 0.7 }}>Produits</div>
               </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                style={{ alignSelf: 'center', padding: '10px 16px', borderRadius: '999px', border: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: '12px', fontWeight: 600 }}
+              >
+                Se deconnecter
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '0 48px' }}>
-        <div className="container" style={{ display: 'flex', gap: '32px' }}>
+      <div className="admin-tabs-bar" style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '0 48px' }}>
+        <div className="container admin-tabs" style={{ display: 'flex', gap: '32px' }}>
           {[
             { id: 'products', label: 'Produits', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> },
             { id: 'orders', label: 'Commandes', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> },
@@ -187,7 +257,7 @@ export default function Admin() {
       </div>
 
       {/* Content */}
-      <div className="container" style={{ padding: '32px 48px' }}>
+      <div className="container admin-content" style={{ padding: '32px 48px' }}>
         
         {/* PRODUITS */}
         {activeTab === 'products' && (
@@ -224,8 +294,8 @@ export default function Admin() {
             )}
 
             {/* Products Table */}
-            <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div className="admin-table-wrap" style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+              <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead style={{ background: 'var(--rose-pale)' }}>
                   <tr>
                     <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--gris)' }}>Produit</th>
@@ -325,8 +395,8 @@ export default function Admin() {
               </div>
             </div>
 
-            <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div className="admin-table-wrap" style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+              <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead style={{ background: 'var(--rose-pale)' }}>
                   <tr>
                     <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--gris)' }}>N° Commande</th>
@@ -461,8 +531,8 @@ export default function Admin() {
               />
             )}
 
-            <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div className="admin-table-wrap" style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+              <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead style={{ background: 'var(--rose-pale)' }}>
                   <tr>
                     <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--gris)' }}>Titre</th>
@@ -553,8 +623,8 @@ export default function Admin() {
               />
             )}
 
-            <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div className="admin-table-wrap" style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+              <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead style={{ background: 'var(--rose-pale)' }}>
                   <tr>
                     <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--gris)' }}>Nom</th>
@@ -631,7 +701,7 @@ export default function Admin() {
         {activeTab === 'settings' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <h2 style={{ fontSize: '20px', marginBottom: '24px' }}>Paramètres du Site</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div className="admin-settings-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
               <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
                 <h3 style={{ fontSize: '16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -742,7 +812,7 @@ function ProductForm({ product, onSave, onCancel }) {
       style={{ background: '#fff', borderRadius: '12px', padding: '24px', marginBottom: '24px', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
     >
       <h3 style={{ fontSize: '16px', marginBottom: '16px' }}>{product ? 'Modifier le produit' : 'Ajouter un nouveau produit'}</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
         <div>
           <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Nom du produit</label>
           <input 
@@ -909,7 +979,7 @@ function PartnerForm({ partner, onSave, onCancel }) {
       style={{ background: '#fff', borderRadius: '12px', padding: '24px', marginBottom: '24px', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
     >
       <h3 style={{ fontSize: '16px', marginBottom: '16px' }}>{partner ? 'Modifier le partenaire' : 'Nouveau partenaire'}</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
         <div>
           <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Nom</label>
           <input 

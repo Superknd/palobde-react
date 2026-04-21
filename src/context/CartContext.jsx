@@ -22,7 +22,6 @@ export function CartProvider({ children }) {
       }
       return [...prev, { ...product, quantity: product.quantity || 1 }];
     });
-    setIsOpen(true);
   };
 
   const removeFromCart = (productId) => {

@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import images from '../data/images';
 
 const blogPosts = [
   { 
@@ -11,7 +12,7 @@ const blogPosts = [
     category: 'Santé',
     date: '18 Avril 2026',
     readTime: '5 min',
-    image: null,
+    image: images.blog[0],
     color: 'rose'
   },
   { 
@@ -21,7 +22,7 @@ const blogPosts = [
     category: 'Conseils',
     date: '15 Avril 2026',
     readTime: '3 min',
-    image: null,
+    image: images.blog[1],
     color: 'vert'
   },
   { 
@@ -31,7 +32,7 @@ const blogPosts = [
     category: 'Impact',
     date: '10 Avril 2026',
     readTime: '4 min',
-    image: null,
+    image: images.impact[0],
     color: 'terre'
   },
   { 
@@ -41,7 +42,7 @@ const blogPosts = [
     category: 'Produit',
     date: '5 Avril 2026',
     readTime: '4 min',
-    image: null,
+    image: images.products.kitJour,
     color: 'rose'
   },
   { 
@@ -51,7 +52,7 @@ const blogPosts = [
     category: 'Santé',
     date: '1 Avril 2026',
     readTime: '6 min',
-    image: null,
+    image: images.blog[2],
     color: 'vert'
   },
   { 
@@ -61,7 +62,7 @@ const blogPosts = [
     category: 'Artisanat',
     date: '28 Mars 2026',
     readTime: '5 min',
-    image: null,
+    image: images.team[0],
     color: 'terre'
   }
 ];
@@ -184,7 +185,7 @@ export default function Blog() {
       {/* Blog Posts Grid */}
       <section style={{ padding: '48px', background: 'var(--blanc)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ 
+          <div className="blog-page-grid" style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(3, 1fr)', 
             gap: '32px' 
@@ -212,29 +213,12 @@ export default function Blog() {
                              post.color === 'vert' ? 'linear-gradient(135deg, var(--vert-light), var(--vert))' : 
                              'linear-gradient(135deg, var(--terre-light), var(--terre))'
                 }}>
-                  {post.image ? (
-                    <img 
-                      src={post.image} 
-                      alt={post.title}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  ) : (
-                    <div style={{ 
-                      position: 'absolute', 
-                      inset: 0, 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center' 
-                    }}>
-                      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                      </svg>
-                    </div>
-                  )}
+                  <img 
+                    src={post.image} 
+                    alt={post.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(26,26,26,0.4), rgba(26,26,26,0.06))' }} />
                   <span style={{
                     position: 'absolute',
                     top: '16px',

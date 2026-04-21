@@ -344,6 +344,16 @@ img {
   background-position: center !important;
 }
 
+.admin-page input,
+.admin-page select,
+.admin-page textarea {
+  min-width: 0;
+}
+
+.admin-page table {
+  min-width: 820px;
+}
+
 @media (max-width: 768px) {
   .container { padding: 0 20px; }
 }
@@ -385,12 +395,27 @@ img {
     grid-template-columns: 1fr !important;
   }
 
+  .admin-topbar-inner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .admin-settings-grid,
+  .admin-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
   .boutique-sidebar {
     position: static !important;
     top: auto !important;
     height: auto !important;
     border-right: none !important;
     border-bottom: 1px solid var(--rose-light);
+  }
+
+  .admin-tabs {
+    overflow-x: auto;
+    padding-bottom: 8px;
   }
 }
 
@@ -526,6 +551,32 @@ img {
   .product-layout {
     gap: 28px !important;
   }
+
+  .admin-topbar,
+  .admin-tabs-bar,
+  .admin-content {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .admin-topbar-inner {
+    align-items: flex-start !important;
+  }
+
+  .admin-stats {
+    width: 100%;
+    gap: 14px !important;
+  }
+
+  .admin-stats > div,
+  .admin-stats > button {
+    flex: 1 1 calc(50% - 14px);
+    min-width: 120px;
+  }
+
+  .admin-table-wrap {
+    overflow-x: auto;
+  }
 }
 
 @media (max-width: 560px) {
@@ -564,7 +615,19 @@ img {
     height: min(88vw, 320px) !important;
   }
 
+  .hero-right > div:last-child {
+    left: 20px !important;
+    right: 20px;
+    bottom: 20px !important;
+    width: auto;
+  }
+
   .footer-bottom p {
     width: 100%;
+  }
+
+  .admin-stats > div,
+  .admin-stats > button {
+    flex-basis: 100%;
   }
 }
