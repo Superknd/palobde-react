@@ -2,43 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import images from '../data/images';
-
-const products = [
-  {
-    id: 1,
-    name: 'Kit Journee Complete',
-    desc: '3 serviettes jour en Faso Danfani rose, lavables et reutilisables',
-    price: '3 500',
-    badge: 'Bestseller',
-    color: 'rose',
-    image: images.products.kitJour,
-  },
-  {
-    id: 2,
-    name: 'Serviette Nuit',
-    desc: 'Protection renforcee en coton local pour des nuits sereines',
-    price: '1 800',
-    color: 'vert',
-    image: images.products.kitNuit,
-  },
-  {
-    id: 3,
-    name: 'Kit Dignite Scolaire',
-    desc: 'Sachet lavable, 5 serviettes et brochure hygiene pour eleves',
-    price: '4 200',
-    badge: 'Scolaire',
-    color: 'terre',
-    image: images.products.kitScolaire,
-  },
-  {
-    id: 4,
-    name: 'Culotte Menstruelle',
-    desc: 'Double couche absorbante, coupe moderne et tres confortable',
-    price: '5 000',
-    color: 'mix',
-    image: images.products.culotte,
-  },
-];
+import { loadBlogPosts, loadProducts } from '../data/contentStore';
 
 const stats = [
   { num: '+10 000', label: 'Filles sensibilisees' },
@@ -46,30 +10,6 @@ const stats = [
   { num: '15 ans', label: 'Duree moyenne' },
   { num: '-90%', label: 'Dechets evites' },
   { num: '120+', label: 'Artisanes employees' },
-];
-
-const blogPosts = [
-  {
-    cat: 'Hygiene',
-    title: 'Comment entretenir sa serviette lavable en 5 etapes ?',
-    date: '15 Jan 2025',
-    color: 'b1',
-    image: images.blog[0],
-  },
-  {
-    cat: 'Sante',
-    title: 'Regles douloureuses : ce que votre corps essaie de vous dire',
-    date: '8 Jan 2025',
-    color: 'b2',
-    image: images.blog[1],
-  },
-  {
-    cat: 'Environnement',
-    title: 'Faso Danfani : le tissu qui revolutionne l hygiene menstruelle',
-    date: '2 Jan 2025',
-    color: 'b3',
-    image: images.blog[2],
-  },
 ];
 
 const paymentMethods = [
@@ -102,6 +42,8 @@ const impactItems = [
 
 export default function Home() {
   const { addToCart } = useCart();
+  const products = loadProducts().filter((product) => product.active !== false).slice(0, 4);
+  const blogPosts = loadBlogPosts().filter((post) => post.status === 'Publié').slice(0, 3);
 
   return (
     <div className="home-page" style={{ paddingTop: '72px' }}>
@@ -362,7 +304,7 @@ export default function Home() {
                   <p style={{ fontSize: '12px', color: 'var(--gris)', lineHeight: 1.5, marginBottom: '14px' }}>{product.desc}</p>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                     <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '20px', fontWeight: 700, color: 'var(--noir)' }}>
-                      {product.price} <span style={{ fontSize: '12px', fontFamily: "'DM Sans', serif", color: 'var(--gris)' }}>FCFA</span>
+                      {Number(product.price).toLocaleString()} <span style={{ fontSize: '12px', fontFamily: "'DM Sans', serif", color: 'var(--gris)' }}>FCFA</span>
                     </div>
                     <motion.button
                       whileHover={{ scale: 1.1 }}
@@ -371,7 +313,7 @@ export default function Home() {
                         addToCart({
                           id: product.id,
                           name: product.name,
-                          price: Number(product.price.replace(' ', '')),
+                          price: Number(product.price),
                           quantity: 1,
                           image: product.image,
                         })
@@ -510,17 +452,17 @@ export default function Home() {
                   <img src={post.image} alt={post.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(26,26,26,0.55), rgba(26,26,26,0.08))' }} />
                   <span style={{ position: 'relative', zIndex: 1, background: 'rgba(255,255,255,0.92)', fontSize: '10px', fontWeight: 700, padding: '4px 12px', borderRadius: '10px', color: 'var(--noir)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    {post.cat}
+                    {post.category}
                   </span>
                 </div>
                 <div style={{ padding: '20px' }}>
                   <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '8px', lineHeight: 1.3 }}>{post.title}</h3>
                   <p style={{ fontSize: '12px', color: 'var(--gris)', lineHeight: 1.6 }}>
-                    Guide illustre pour laver, secher et conserver vos serviettes Palobde.
+                    {post.excerpt || 'Article educatif Palobde Afrique.'}
                   </p>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px' }}>
-                    <span style={{ fontSize: '11px', color: 'var(--gris)' }}>{post.date}</span>
-                    <Link to="/blog" style={{ fontSize: '12px', fontWeight: 600, color: 'var(--vert)', textDecoration: 'none' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--gris)' }}>{String(post.date).replaceAll('-', '/')}</span>
+                    <Link to={`/blog/${post.id}`} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--vert)', textDecoration: 'none' }}>
                       Lire →
                     </Link>
                   </div>

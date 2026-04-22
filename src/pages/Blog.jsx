@@ -2,76 +2,14 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import images from '../data/images';
-
-const blogPosts = [
-  { 
-    id: 1, 
-    title: 'L\'hygiène menstruelle au Burkina Faso : un défi quotidien', 
-    excerpt: 'Découvrez les défis auxquels font face les femmes et jeunes filles au Burkina Faso et les solutions que nous apportons.',
-    category: 'Santé',
-    date: '18 Avril 2026',
-    readTime: '5 min',
-    image: images.blog[0],
-    color: 'rose'
-  },
-  { 
-    id: 2, 
-    title: 'Guide d\'entretien des serviettes lavables en Faso Danfani', 
-    excerpt: 'Apprenez à entretenir vos serviettes lavables pour une durée de vie optimale de 15 ans.',
-    category: 'Conseils',
-    date: '15 Avril 2026',
-    readTime: '3 min',
-    image: images.blog[1],
-    color: 'vert'
-  },
-  { 
-    id: 3, 
-    title: 'L\'impact de Palobde sur la vie des jeunes filles scolaires', 
-    excerpt: 'Témoignages et statistiques sur l\'impact de nos programmes de distribution dans les écoles.',
-    category: 'Impact',
-    date: '10 Avril 2026',
-    readTime: '4 min',
-    image: images.impact[0],
-    color: 'terre'
-  },
-  { 
-    id: 4, 
-    title: 'Pourquoi choisir le Faso Danfani pour vos serviettes ?', 
-    excerpt: 'Les avantages uniques du tissu traditionnel burkinabè : absorption, confort et durabilité.',
-    category: 'Produit',
-    date: '5 Avril 2026',
-    readTime: '4 min',
-    image: images.products.kitJour,
-    color: 'rose'
-  },
-  { 
-    id: 5, 
-    title: 'Règles douloureuses : comprendre et soulager les dysménorrhées', 
-    excerpt: 'Conseils médicaux et naturels pour soulager les douleurs menstruelles.',
-    category: 'Santé',
-    date: '1 Avril 2026',
-    readTime: '6 min',
-    image: images.blog[2],
-    color: 'vert'
-  },
-  { 
-    id: 6, 
-    title: 'Le métier de tisseuse chez Palobde Afrique', 
-    excerpt: 'Rencontre avec nos artisanes qui perpétuent le savoir-faire du Faso Danfani.',
-    category: 'Artisanat',
-    date: '28 Mars 2026',
-    readTime: '5 min',
-    image: images.team[0],
-    color: 'terre'
-  }
-];
+import { loadBlogPosts } from '../data/contentStore';
 
 const categories = ['Tous', 'Santé', 'Conseils', 'Impact', 'Produit', 'Artisanat'];
 
 export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState('Tous');
   const [searchQuery, setSearchQuery] = useState('');
+  const blogPosts = loadBlogPosts().filter((post) => post.status === 'Publié');
 
   const filteredPosts = blogPosts.filter(post => {
     const matchesCategory = selectedCategory === 'Tous' || post.category === selectedCategory;
@@ -205,6 +143,7 @@ export default function Blog() {
                   cursor: 'pointer'
                 }}
               >
+                <Link to={`/blog/${post.id}`} style={{ display: 'block', color: 'inherit', textDecoration: 'none', height: '100%' }}>
                 {/* Image Area */}
                 <div style={{ 
                   height: '200px', 
@@ -237,7 +176,7 @@ export default function Blog() {
 
                 {/* Content */}
                 <div style={{ padding: '24px' }}>
-                  <div style={{ 
+                  <div style={{
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '12px', 
@@ -245,7 +184,7 @@ export default function Blog() {
                     fontSize: '12px',
                     color: 'var(--gris)'
                   }}>
-                    <span>{post.date}</span>
+                    <span>{String(post.date).replaceAll('-', '/')}</span>
                     <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--rose-light)' }}></span>
                     <span>{post.readTime} de lecture</span>
                   </div>
@@ -281,6 +220,7 @@ export default function Blog() {
                     </svg>
                   </div>
                 </div>
+                </Link>
               </motion.article>
             ))}
           </div>

@@ -1,18 +1,8 @@
 // filepath: palobde-react/src/pages/Boutique.jsx
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import images from '../data/images';
-
-const products = [
-  { id: 1, name: 'Kit Journée — Rose Faso', sub: '3 serviettes jour · Faso Danfani', price: 3500, badge: 'Bestseller', color: 'rose', image: images.products.kitJour },
-  { id: 2, name: 'Serviette Nuit — Vert Nature', sub: 'Protection extra longue', price: 1800, color: 'vert', image: images.products.kitNuit },
-  { id: 3, name: 'Kit Scolaire — Terre', sub: '5 serviettes + sachet', price: 4200, color: 'terre', image: images.products.kitScolaire },
-  { id: 4, name: 'Culotte Menstruelle — Rose', sub: 'Double couche', price: 5000, color: 'rose', image: images.products.culotte },
-  { id: 5, name: 'Kit Nuit Complete', sub: '2 serviettes nuit', price: 3200, color: 'vert', image: images.products.kitNuit },
-  { id: 6, name: 'Sachet Lavable', sub: 'Tissu Faso Danfani', price: 1500, color: 'terre', image: images.products.sachet }
-];
+import { loadProducts } from '../data/contentStore';
 
 const categories = [
   { name: 'Tous les produits', count: 12, active: true },
@@ -25,6 +15,7 @@ const categories = [
 export default function Boutique() {
   const [priceValue, setPriceValue] = useState(8000);
   const { addToCart } = useCart();
+  const products = loadProducts().filter((product) => product.active !== false && Number(product.price) <= priceValue);
   
   return (
     <div style={{ paddingTop: '72px' }}>
@@ -96,7 +87,7 @@ export default function Boutique() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <p style={{ fontSize: '13px', color: 'var(--gris)' }}><b>12 produits</b> trouvés</p>
+            <p style={{ fontSize: '13px', color: 'var(--gris)' }}><b>{products.length} produits</b> trouvés</p>
             <select style={{ padding: '8px 16px', border: '1.5px solid var(--rose-light)', borderRadius: '20px', fontSize: '13px', background: 'var(--blanc)', color: 'var(--noir)', cursor: 'pointer' }}>
               <option>Trier : Popularité</option>
               <option>Prix croissant</option>
@@ -137,7 +128,7 @@ export default function Boutique() {
                     <motion.button 
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => addToCart(product)}
+                      onClick={() => addToCart({ ...product, quantity: 1 })}
                       style={{ background: 'var(--noir)', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
                     >+ Panier</motion.button>
                   </div>

@@ -344,6 +344,25 @@ img {
   background-position: center !important;
 }
 
+.home-hero .hero-left {
+  background: rgba(254, 250, 248, 0.86);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(232, 160, 160, 0.22);
+}
+
+.home-hero .hero-left h1 {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 10px 26px rgba(26, 26, 26, 0.12);
+}
+
+.home-hero .hero-left p {
+  color: rgba(26, 26, 26, 0.74) !important;
+}
+
+.home-hero .hero-left .hero-badge {
+  box-shadow: 0 8px 20px rgba(26, 26, 26, 0.08);
+}
+
 .admin-page input,
 .admin-page select,
 .admin-page textarea {

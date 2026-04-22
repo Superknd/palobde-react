@@ -1,19 +1,10 @@
 // filepath: palobde-react/src/pages/Admin.jsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { fileToDataUrl, loadBlogPosts, loadProducts, saveBlogPosts, saveProducts } from '../data/contentStore';
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'palobde2026';
 const ADMIN_SESSION_KEY = 'palobde-admin-session';
-
-// Données initiales (simulées - en production, cela viendrait d'une API/base de données)
-const initialProducts = [
-  { id: 1, name: 'Kit Journée — Rose Faso', category: 'Serviettes Jour', price: 3500, stock: 45, active: true, image: null, description: 'Kit complet pour la journée avec 3 serviettes lavables' },
-  { id: 2, name: 'Serviette Nuit — Vert Nature', category: 'Serviettes Nuit', price: 1800, stock: 32, active: true, image: null, description: 'Serviette extra-absorbante pour la nuit' },
-  { id: 3, name: 'Kit Scolaire — Terre', category: 'Kits Scolaires', price: 4200, stock: 28, active: true, image: null, description: 'Kit adapté aux jeunes filles школьного возраста' },
-  { id: 4, name: 'Culotte Menstruelle — Rose', category: 'Culottes', price: 5000, stock: 15, active: true, image: null, description: 'Culotte lavable réutilisable' },
-  { id: 5, name: 'Kit Nuit Complete', category: 'Serviettes Nuit', price: 3200, stock: 20, active: true, image: null, description: 'Kit complet pour la nuit' },
-  { id: 6, name: 'Sachet Lavable', category: 'Accessoires', price: 1500, stock: 50, active: true, image: null, description: 'Sachet imperméable pour transporter les serviettes' }
-];
 
 const initialOrders = [
   { id: 'CMD-001', client: 'Aminata K.', email: 'aminata@email.bf', phone: '+226 70 12 34 56', address: 'Ouagadougou, Secteur 15', date: '2026-04-15', total: 7500, status: 'Livrée', items: [{ name: 'Kit Journée — Rose Faso', qty: 2, price: 3500 }] },
@@ -21,12 +12,6 @@ const initialOrders = [
   { id: 'CMD-003', client: 'Fatou B.', email: 'fatou@email.bf', phone: '+226 66 34 56 78', address: 'Koudougou', date: '2026-04-17', total: 1800, status: 'En attente', items: [{ name: 'Serviette Nuit — Vert Nature', qty: 1, price: 1800 }] },
   { id: 'CMD-004', client: 'ONG Espoir', email: 'contact@ongespoir.bf', phone: '+226 50 11 22 33', address: 'Ouagadougou, Centre', date: '2026-04-18', total: 84000, status: 'Livrée', items: [{ name: 'Kit Scolaire — Terre', qty: 20, price: 4200 }] },
   { id: 'CMD-005', client: 'Aïcha M.', email: 'aicha@email.bf', phone: '+226 71 45 67 89', address: 'Fada N\'Gourma', date: '2026-04-19', total: 6800, status: 'En attente', items: [{ name: 'Kit Nuit Complete', qty: 1, price: 3200 }, { name: 'Sachet Lavable', qty: 2, price: 1500 }] }
-];
-
-const initialBlogPosts = [
-  { id: 1, title: 'L\'hygiène menstruelle au Burkina Faso', date: '2026-04-10', status: 'Publié', views: 245, content: 'Article sur les défis de l\'hygiène menstruelle au Burkina Faso...', image: null },
-  { id: 2, title: 'Guide d\'entretien des serviettes lavables', date: '2026-04-05', status: 'Publié', views: 189, content: 'Comment entretenir vos serviettes lavables pour une durée de vie optimale...', image: null },
-  { id: 3, title: 'L\'impact de Palobde sur les jeunes filles', date: '2026-04-01', status: 'Brouillon', views: 0, content: 'Témoignages et statistiques sur l\'impact de nos programmes...', image: null }
 ];
 
 const initialPartners = [
@@ -46,9 +31,9 @@ export default function Admin() {
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState('');
   const [activeTab, setActiveTab] = useState('products');
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState(() => loadProducts());
   const [orders, setOrders] = useState(initialOrders);
-  const [blogPosts, setBlogPosts] = useState(initialBlogPosts);
+  const [blogPosts, setBlogPosts] = useState(() => loadBlogPosts());
   const [partners, setPartners] = useState(initialPartners);
   const [editingProduct, setEditingProduct] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
@@ -57,6 +42,14 @@ export default function Admin() {
   const [showAddPostForm, setShowAddPostForm] = useState(false);
   const [showAddPartnerForm, setShowAddPartnerForm] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  useEffect(() => {
+    saveProducts(products);
+  }, [products]);
+
+  useEffect(() => {
+    saveBlogPosts(blogPosts);
+  }, [blogPosts]);
 
   // Stats
   const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
@@ -67,19 +60,19 @@ export default function Admin() {
   // Product handlers
   const handleDeleteProduct = (id) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      setProducts(products.filter(p => p.id !== id));
+      setProducts(products.filter((p) => p.id !== id));
     }
   };
 
   const handleToggleActive = (id) => {
-    setProducts(products.map(p => p.id === id ? { ...p, active: !p.active } : p));
+    setProducts(products.map((p) => (p.id === id ? { ...p, active: !p.active } : p)));
   };
 
   const handleSaveProduct = (product) => {
     if (product.id) {
-      setProducts(products.map(p => p.id === product.id ? product : p));
+      setProducts(products.map((p) => (p.id === product.id ? product : p)));
     } else {
-      setProducts([...products, { ...product, id: Date.now() }]);
+      setProducts([...products, { ...product, id: Date.now(), active: true }]);
     }
     setEditingProduct(null);
     setShowAddForm(false);
@@ -93,19 +86,22 @@ export default function Admin() {
   // Blog handlers
   const handleDeletePost = (id) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
-      setBlogPosts(blogPosts.filter(p => p.id !== id));
+      setBlogPosts(blogPosts.filter((p) => p.id !== id));
     }
   };
 
   const handleTogglePostStatus = (id) => {
-    setBlogPosts(blogPosts.map(p => p.id === id ? { ...p, status: p.status === 'Publié' ? 'Brouillon' : 'Publié' } : p));
+    setBlogPosts(blogPosts.map((p) => (p.id === id ? { ...p, status: p.status === 'Publié' ? 'Brouillon' : 'Publié' } : p)));
   };
 
   const handleSavePost = (post) => {
     if (post.id) {
-      setBlogPosts(blogPosts.map(p => p.id === post.id ? post : p));
+      setBlogPosts(blogPosts.map((p) => (p.id === post.id ? post : p)));
     } else {
-      setBlogPosts([...blogPosts, { ...post, id: Date.now(), views: 0, date: new Date().toISOString().split('T')[0] }]);
+      setBlogPosts([
+        ...blogPosts,
+        { ...post, id: Date.now(), views: 0, date: new Date().toISOString().split('T')[0], readTime: post.readTime || '4 min' },
+      ]);
     }
     setEditingPost(null);
     setShowAddPostForm(false);
@@ -311,8 +307,12 @@ export default function Admin() {
                     <tr key={product.id} style={{ borderBottom: '1px solid #eee' }}>
                       <td style={{ padding: '16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ width: '40px', height: '40px', background: 'var(--rose-pale)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                          <div style={{ width: '40px', height: '40px', background: 'var(--rose-pale)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                            {product.image ? (
+                              <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                            )}
                           </div>
                           <div>
                             <div style={{ fontWeight: '500' }}>{product.name}</div>
@@ -545,7 +545,14 @@ export default function Admin() {
                 <tbody>
                   {blogPosts.map(post => (
                     <tr key={post.id} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '16px', fontWeight: '500' }}>{post.title}</td>
+                      <td style={{ padding: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ width: '36px', height: '36px', borderRadius: '8px', overflow: 'hidden', background: 'var(--rose-pale)' }}>
+                            {post.image && <img src={post.image} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                          </div>
+                          <span style={{ fontWeight: '500' }}>{post.title}</span>
+                        </div>
+                      </td>
                       <td style={{ padding: '16px', textAlign: 'center', color: 'var(--gris)' }}>{post.views}</td>
                       <td style={{ padding: '16px', textAlign: 'center' }}>
                         <button 
@@ -796,9 +803,12 @@ function ProductForm({ product, onSave, onCancel }) {
   const [formData, setFormData] = useState(product || {
     name: '',
     category: 'Serviettes Jour',
+    sub: '',
     price: 0,
     stock: 0,
     active: true,
+    badge: '',
+    color: 'rose',
     image: null,
     description: ''
   });
@@ -833,6 +843,16 @@ function ProductForm({ product, onSave, onCancel }) {
           </select>
         </div>
         <div>
+          <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Sous-titre</label>
+          <input
+            type="text"
+            value={formData.sub || ''}
+            onChange={(e) => setFormData({ ...formData, sub: e.target.value })}
+            placeholder="ex: 3 serviettes jour · Faso Danfani"
+            style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px' }}
+          />
+        </div>
+        <div>
           <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Prix (XOF)</label>
           <input 
             type="number" 
@@ -849,6 +869,46 @@ function ProductForm({ product, onSave, onCancel }) {
             onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
             style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px' }}
           />
+        </div>
+        <div>
+          <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Couleur</label>
+          <select
+            value={formData.color || 'rose'}
+            onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+            style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px' }}
+          >
+            <option value="rose">Rose</option>
+            <option value="vert">Vert</option>
+            <option value="terre">Terre</option>
+            <option value="mix">Mix</option>
+          </select>
+        </div>
+        <div>
+          <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Badge</label>
+          <input
+            type="text"
+            value={formData.badge || ''}
+            onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
+            placeholder="ex: Bestseller"
+            style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px' }}
+          />
+        </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Image du produit</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const image = await fileToDataUrl(file);
+              setFormData((prev) => ({ ...prev, image }));
+            }}
+            style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '13px' }}
+          />
+          {formData.image && (
+            <img src={formData.image} alt="Aperçu produit" style={{ marginTop: '10px', width: '92px', height: '92px', objectFit: 'cover', borderRadius: '10px', border: '1px solid #eee' }} />
+          )}
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
           <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Description</label>
@@ -890,6 +950,9 @@ function ProductForm({ product, onSave, onCancel }) {
 function BlogForm({ post, onSave, onCancel }) {
   const [formData, setFormData] = useState(post || {
     title: '',
+    excerpt: '',
+    category: 'Conseils',
+    readTime: '4 min',
     content: '',
     status: 'Brouillon',
     image: null
@@ -922,6 +985,34 @@ function BlogForm({ post, onSave, onCancel }) {
           />
         </div>
         <div>
+          <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Extrait</label>
+          <textarea
+            value={formData.excerpt || ''}
+            onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+            rows={3}
+            style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', resize: 'vertical' }}
+          />
+        </div>
+        <div>
+          <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Catégorie</label>
+          <input
+            type="text"
+            value={formData.category || ''}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px' }}
+          />
+        </div>
+        <div>
+          <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Temps de lecture</label>
+          <input
+            type="text"
+            value={formData.readTime || ''}
+            onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
+            placeholder="ex: 5 min"
+            style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px' }}
+          />
+        </div>
+        <div>
           <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Statut</label>
           <select 
             value={formData.status}
@@ -931,6 +1022,23 @@ function BlogForm({ post, onSave, onCancel }) {
             <option value="Brouillon">Brouillon</option>
             <option value="Publié">Publié</option>
           </select>
+        </div>
+        <div>
+          <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--gris)', display: 'block', marginBottom: '6px' }}>Image de couverture</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const image = await fileToDataUrl(file);
+              setFormData((prev) => ({ ...prev, image }));
+            }}
+            style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '13px' }}
+          />
+          {formData.image && (
+            <img src={formData.image} alt="Aperçu article" style={{ marginTop: '10px', width: '110px', height: '72px', objectFit: 'cover', borderRadius: '10px', border: '1px solid #eee' }} />
+          )}
         </div>
       </div>
       <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>

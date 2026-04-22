@@ -8,6 +8,7 @@ import ONG from './pages/ONG';
 import Don from './pages/Don';
 import About from './pages/About';
 import Blog from './pages/Blog';
+import BlogDetail from './pages/BlogDetail';
 import Admin from './pages/Admin';
 import { CartProvider } from './context/CartContext';
 
@@ -26,6 +27,7 @@ function App() {
               <Route path="/don" element={<Don />} />
               <Route path="/about" element={<About />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogDetail />} />
               <Route path="/admin" element={<Admin />} />
             </Routes>
           </main>
